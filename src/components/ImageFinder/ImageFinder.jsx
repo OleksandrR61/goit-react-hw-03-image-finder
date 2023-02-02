@@ -7,7 +7,7 @@ import styles from './ImageFinder.module.css';
 
 export default class ImageFinder extends Component {
     state = {
-        images: [1, 2, 3, 4],
+        images: [],
         search: "",
         page: 1,
     };
