@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 import { Searchbar, ImageGallery, Button, Loader } from 'components';
 import {getImages, api_per_page} from '../../services/fetch';
@@ -8,6 +9,7 @@ import styles from './ImageFinder.module.css';
 const STATE_STATUS = {
     ready: "ready",
     loading: "loading",
+    modal: "modal"
 };
 
 export default class ImageFinder extends Component {
@@ -19,19 +21,17 @@ export default class ImageFinder extends Component {
         status: STATE_STATUS.ready,
     };
 
-    componentDidUpdate() {
-        if (document.querySelectorAll('img').length > 0) {
+    componentDidUpdate(_, prevState) {
+        if (prevState.images.length !== this.state.images.length && document.querySelectorAll('img').length > 0) {
             document.querySelectorAll('img')[12 * (this.state.page - 1)].scrollIntoView();
-            window.scrollBy(0, -100);
+            window.scrollBy(0, -76);
         };
     }
 
     handleSearch = (event) => {
         event.preventDefault();
 
-        if (this.state.search !== event.target.elements.input.value) {
-            this.handleSetState({search: event.target.elements.input.value});
-        }
+        this.handleSetState({search: event.target.elements.input.value});
 
         event.target.reset();
     };
@@ -51,7 +51,7 @@ export default class ImageFinder extends Component {
             const {data: {hits, total, totalHits}} = await getImages({search, page});
             
             if (total === 0) {
-                return;
+                Notify.failure("Nothing found for your request");
             }
 
             const arrayImages = page === 1 ? [] : [...this.state.images]
@@ -60,9 +60,10 @@ export default class ImageFinder extends Component {
                 images: [...arrayImages, ...hits],
                 search,
                 page,
-                totalPage: Math.ceil(totalHits / api_per_page),
+                totalPage: totalHits > 0 ? Math.ceil(totalHits / api_per_page) : 1,
             });
-        } catch (error) {
+        }
+        catch(error){
             console.log("alarm: " + error.message);
         }
 
@@ -75,10 +76,11 @@ export default class ImageFinder extends Component {
         const {page, totalPage} = this.state;
         return (
             <div className={styles.ImageFinder}>
-                {this.state.status === "ready" && <>
-                    <Searchbar onSearch={this.handleSearch} />
+                <Searchbar onSearch={this.handleSearch} />
+                {(this.state.status === "ready" || this.state.status === "modal") && <>
                     <ImageGallery images={this.state.images} />
                     {page !== totalPage && <Button onClick={this.handleLoadMore}/>}
+                    {this.state.status === "modal" && <Loader />}                    
                 </>}
                 {this.state.status === "loading" && <Loader />}
             </div>
