@@ -88,16 +88,40 @@ export default class ImageFinder extends Component {
 
     render() {
         const {images, imageModal, page, totalPage, status} = this.state;
-        return (
-            <div className={styles.ImageFinder}>
-                <Searchbar onSearch={this.handleSearch} />
-                {(status === "ready" || status === "modal") && <>
-                    {images.length > 0 && <ImageGallery images={images} onClick={this.handleModalOpen}/>}
-                    {page !== totalPage && <Button onClick={this.handleLoadMore}/>}
-                    {status === "modal" && <Modal image={imageModal} onClick={this.handleModalClose}/>}                    
-                </>}
-                {status === "loading" && <Loader />}
-            </div>
-        );
+
+        switch (status) {
+            case "ready":
+                return (
+                    <div className={styles.ImageFinder}>
+                        <Searchbar onSearch={this.handleSearch} />
+                        {images.length > 0 &&
+                            <ImageGallery images={images} onClick={this.handleModalOpen}/>
+                        }
+                        {page !== totalPage && <Button onClick={this.handleLoadMore}/>}
+                    </div>
+                );
+            
+            case "loading":
+                return (
+                    <div className={styles.ImageFinder}>
+                        <Searchbar onSearch={this.handleSearch} />
+                        <Loader />
+                    </div>
+                );
+
+            case "modal":
+                return (
+                    <div className={styles.ImageFinder}>
+                        <Searchbar onSearch={this.handleSearch} />
+                        {images.length > 0 &&
+                            <ImageGallery images={images} onClick={this.handleModalOpen}/>
+                        }
+                        {page !== totalPage && <Button onClick={this.handleLoadMore}/>}
+                        <Modal image={imageModal} onClick={this.handleModalClose}/>
+                    </div>
+                );
+
+            default: return;
+        };
     };
 };
