@@ -21,7 +21,8 @@ export default class ImageFinder extends Component {
     };
 
     handleSetState = ({search = this.state.search, page = 1}) => {
-
+        const res = getImages({search, page});
+        console.log(res);
     }
 
     render() {

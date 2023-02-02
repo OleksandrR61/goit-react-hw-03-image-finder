@@ -4,7 +4,7 @@ import styles from './ImageGallery.module.css';
 
 export const ImageGallery = ({images}) => (
     <ul className={styles.ImageGallery}>
-        {images.map(image => <li key={image.id} image={image}>Hello</li>)}
+        {images.map((image, index) => <li key={index} image={image}>Hello</li>)}
     </ul>
 );
 
