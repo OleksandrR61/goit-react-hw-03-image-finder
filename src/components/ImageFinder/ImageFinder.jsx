@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-import { Searchbar, ImageGallery, Button, Loader } from 'components';
+import { Searchbar, ImageGallery, Button, Loader, Modal } from 'components';
 import {getImages, api_per_page} from '../../services/fetch';
 
 import styles from './ImageFinder.module.css';
@@ -15,6 +15,7 @@ const STATE_STATUS = {
 export default class ImageFinder extends Component {
     state = {
         images: [],
+        imageModal: {},
         search: "",
         page: 1,
         totalPage: 1,
@@ -40,7 +41,20 @@ export default class ImageFinder extends Component {
         this.handleSetState({page: this.state.page + 1});
 
         event.target.blur();
-    }
+    };
+
+    handleModalOpen = (image) => {
+        this.setState({
+            imageModal: image,
+            status: STATE_STATUS.modal,
+        });
+    };
+
+    handleModalClose = () => {
+        this.setState({
+            status: STATE_STATUS.ready,
+        });
+    };
 
     handleSetState = async ({search = this.state.search, page = 1}) => {
         this.setState({
@@ -73,16 +87,16 @@ export default class ImageFinder extends Component {
     }
 
     render() {
-        const {page, totalPage} = this.state;
+        const {images, imageModal, page, totalPage, status} = this.state;
         return (
             <div className={styles.ImageFinder}>
                 <Searchbar onSearch={this.handleSearch} />
-                {(this.state.status === "ready" || this.state.status === "modal") && <>
-                    <ImageGallery images={this.state.images} />
+                {(status === "ready" || status === "modal") && <>
+                    {images.length > 0 && <ImageGallery images={images} onClick={this.handleModalOpen}/>}
                     {page !== totalPage && <Button onClick={this.handleLoadMore}/>}
-                    {this.state.status === "modal" && <Loader />}                    
+                    {status === "modal" && <Modal image={imageModal} onClick={this.handleModalClose}/>}                    
                 </>}
-                {this.state.status === "loading" && <Loader />}
+                {status === "loading" && <Loader />}
             </div>
         );
     };
