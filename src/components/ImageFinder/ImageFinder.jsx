@@ -1,7 +1,7 @@
 import { Component } from 'react';
 
 import { Searchbar, ImageGallery } from 'components';
-import {getImages} from '../../services/fetch';
+import {getImages, api_per_page} from '../../services/fetch';
 
 import styles from './ImageFinder.module.css';
 
@@ -20,9 +20,18 @@ export default class ImageFinder extends Component {
         event.target.reset();
     };
 
-    handleSetState = ({search = this.state.search, page = 1}) => {
-        const res = getImages({search, page});
-        console.log(res);
+    handleSetState = async ({search = this.state.search, page = 1}) => {
+        try {
+            const response = await getImages({search, page});
+            this.setState(prevState => ({
+                images: [...prevState.images, ...response.data.hits],
+                search,
+                page,
+                totalPage: Math.ceil(response.data.totalHits / api_per_page),
+            }));
+        } catch (error) {
+            console.log("alarm: " + error.message);
+        }
     }
 
     render() {
